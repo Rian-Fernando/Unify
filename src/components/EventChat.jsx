@@ -28,17 +28,26 @@ const EventChat = () => {
     );
 
     const unsubMessages = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        // Correctly convert timestamp to Date and format
-        timestampFormatted: doc.data().timestamp?.toDate
-          ? doc.data().timestamp.toDate().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "—",
-      }));
+      const msgs = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        let timestampFormatted = "—";
+        
+        // Check if timestamp exists and is an object with 'seconds' and 'nanoseconds'
+        if (data.timestamp && data.timestamp.seconds && data.timestamp.nanoseconds) {
+          // Convert timestamp to a Date and format it
+          const timestamp = new Date(data.timestamp.seconds * 1000);
+          timestampFormatted = timestamp.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+
+        return {
+          id: doc.id,
+          ...data,
+          timestampFormatted,
+        };
+      });
       setMessages(msgs);
     });
 
