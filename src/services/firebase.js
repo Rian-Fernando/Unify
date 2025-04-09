@@ -2,19 +2,19 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Load Firebase config from .env
 const firebaseConfig = {
-  apiKey: "AIzaSyDDe8Um0y5gAA8Y1XBzwW7NmQZo9Ega1Z4",
-  authDomain: "unify-a59bc.firebaseapp.com",
-  projectId: "unify-a59bc",
-  storageBucket: "unify-a59bc.firebasestorage.app",
-  messagingSenderId: "855932831795",
-  appId: "1:855932831795:web:34a195c50e4493d9c4fb46"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ✅ Export auth and db to use in the rest of your app
+// Exports
 export const auth = getAuth(app);
 export const db = getFirestore(app);
