@@ -4,9 +4,6 @@ import {
   collection,
   addDoc,
   onSnapshot,
-  serverTimestamp,
-  query,
-  orderBy,
 } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -22,33 +19,16 @@ const EventChat = () => {
       setUser(currentUser);
     });
 
-    const q = query(
+    const unsubMessages = onSnapshot(
       collection(db, "events", eventId, "messages"),
-      orderBy("timestamp", "asc")
-    );
-
-    const unsubMessages = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => {
-        const data = doc.data();
-
-        // Fix: Format the timestamp field before rendering
-        let timestampFormatted = "—"; // Default value in case timestamp doesn't exist
-        if (data.timestamp && data.timestamp.seconds) {
-          const timestamp = new Date(data.timestamp.seconds * 1000);
-          timestampFormatted = timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        }
-
-        return {
+      (snapshot) => {
+        const msgs = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...data,
-          timestampFormatted, // Add the formatted timestamp to the message data
-        };
-      });
-      setMessages(msgs);
-    });
+          ...doc.data(),
+        }));
+        setMessages(msgs);
+      }
+    );
 
     return () => {
       unsubAuth();
@@ -59,11 +39,10 @@ const EventChat = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
 
-    // Save message to Firestore with server timestamp
+    // Save message to Firestore
     await addDoc(collection(db, "events", eventId, "messages"), {
       text: newMessage,
       sender: user.email,
-      timestamp: serverTimestamp(),
     });
 
     setNewMessage("");
@@ -85,8 +64,6 @@ const EventChat = () => {
           >
             <p className="text-sm font-semibold">{msg.sender}</p>
             <p>{msg.text}</p>
-            {/* Render the formatted timestamp here */}
-            <p className="text-xs text-gray-400 mt-1">{msg.timestampFormatted}</p>
           </div>
         ))}
       </div>
