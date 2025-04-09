@@ -1,73 +1,107 @@
-import { useEffect, useState } from "react";
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
-import { db } from "../services/firebase";
-import { useAuth } from "../AuthContext";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  serverTimestamp,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import { db, auth } from "../services/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
-const EventChat = ({ eventId }) => {
-  const { user } = useAuth();
+const EventChat = () => {
+  const { eventId } = useParams();
   const [messages, setMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
     const q = query(
       collection(db, "events", eventId, "messages"),
       orderBy("timestamp", "asc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setMessages(fetched);
+    const unsubMessages = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setMessages(msgs);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubAuth();
+      unsubMessages();
+    };
   }, [eventId]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!newMsg.trim()) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !user) return;
 
+    await addDoc(collection(db, "events", eventId, "messages"), {
+      text: newMessage,
+      sender: user.email,
+      timestamp: serverTimestamp(),
+    });
+
+    setNewMessage("");
+  };
+
+  const formatTimestamp = (timestampObj) => {
     try {
-      await addDoc(collection(db, "events", eventId, "messages"), {
-        sender: user.email,
-        text: newMsg,
-        timestamp: serverTimestamp(),
-      });
-      setNewMsg("");
+      if (!timestampObj || typeof timestampObj !== "object") return "—";
+      if (typeof timestampObj.toDate === "function") {
+        const date = timestampObj.toDate();
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+      return "—";
     } catch (err) {
-      console.error("❌ Error sending message:", err);
+      console.error("Error formatting timestamp:", err);
+      return "—";
     }
   };
 
   return (
-    <div className="mt-4 border-t pt-4">
-      <h3 className="text-lg font-semibold mb-2">💬 Event Chat</h3>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">💬 Event Chat</h2>
 
-      <div className="max-h-40 overflow-y-auto space-y-2 mb-3">
-        {messages.map(msg => (
-          <div key={msg.id} className="text-sm">
-            <span className="font-medium text-blue-700">{msg.sender}</span>: {msg.text}
+      <div className="border p-4 rounded h-96 overflow-y-auto bg-white shadow">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`mb-3 p-2 rounded ${
+              msg.sender === user?.email
+                ? "bg-blue-100 text-right ml-20"
+                : "bg-gray-100 mr-20"
+            }`}
+          >
+            <p className="text-sm font-semibold">{msg.sender}</p>
+            <p>{msg.text}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {formatTimestamp(msg.timestamp)}
+            </p>
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSend} className="flex gap-2">
+      <div className="mt-4 flex">
         <input
           type="text"
-          value={newMsg}
-          onChange={(e) => setNewMsg(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 px-2 py-1 border rounded"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          className="flex-grow border p-2 rounded-l focus:outline-none"
+          placeholder="Type a message..."
         />
         <button
-          type="submit"
-          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+          onClick={handleSendMessage}
+          className="bg-blue-500 text-white px-4 rounded-r hover:bg-blue-600"
         >
           Send
         </button>
-      </form>
+      </div>
     </div>
   );
 };
