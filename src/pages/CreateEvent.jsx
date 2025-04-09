@@ -1,30 +1,48 @@
 import { useState } from "react";
+import { db } from "../services/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../AuthContext";
 
 const CreateEvent = () => {
   const [title, setTitle] = useState("");
   const [time, setTime] = useState("");
   const [tags, setTags] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!title || !time) {
+      alert("Title and time are required.");
+      return;
+    }
 
-    const newEvent = {
-      title,
-      time,
-      tags: tags.split(",").map(tag => tag.trim()),
-      capacity: capacity || "Unlimited",
-    };
+    setLoading(true);
 
-    console.log("Event Created:", newEvent);
+    try {
+      const eventData = {
+        title,
+        time,
+        tags: tags.split(",").map(tag => tag.trim()),
+        capacity: capacity || "Unlimited",
+        createdAt: serverTimestamp(),
+        createdBy: user.email,
+      };
 
-    // 🔜 Later we'll store this in Firebase!
-    alert("Event created! (Check console for now)");
+      await addDoc(collection(db, "events"), eventData);
 
-    setTitle("");
-    setTime("");
-    setTags("");
-    setCapacity("");
+      alert("✅ Event created successfully!");
+      setTitle("");
+      setTime("");
+      setTags("");
+      setCapacity("");
+    } catch (err) {
+      console.error("❌ Error creating event:", err);
+      alert("Error creating event.");
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -65,8 +83,14 @@ const CreateEvent = () => {
           onChange={(e) => setCapacity(e.target.value)}
         />
 
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Post Event
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {loading ? "Posting..." : "Post Event"}
         </button>
       </form>
     </div>
