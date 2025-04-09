@@ -28,23 +28,17 @@ const EventChat = () => {
     );
 
     const unsubMessages = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => {
-        const data = doc.data();
-
-        // Format timestamp into a human-readable string
-        const timestamp = data.timestamp?.seconds
-          ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        // Correctly convert timestamp to Date and format
+        timestampFormatted: doc.data().timestamp?.toDate
+          ? doc.data().timestamp.toDate().toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })
-          : "—";
-
-        return {
-          id: doc.id,
-          ...data,
-          timestampFormatted: timestamp,
-        };
-      });
+          : "—",
+      }));
       setMessages(msgs);
     });
 
