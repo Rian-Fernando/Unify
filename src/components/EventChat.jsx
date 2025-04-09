@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -14,21 +10,23 @@ const EventChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [user, setUser] = useState(null);
 
+  // Listen for user authentication status
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
 
+    // Get messages from Firestore for the specific event
     const unsubMessages = onSnapshot(
       collection(db, "events", eventId, "messages"),
       (snapshot) => {
         const msgs = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
+          // Removed timestamp logic
         }));
         setMessages(msgs);
-      }
-    );
+      });
 
     return () => {
       unsubAuth();
@@ -36,16 +34,16 @@ const EventChat = () => {
     };
   }, [eventId]);
 
+  // Handle sending a message
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
 
-    // Save message to Firestore
     await addDoc(collection(db, "events", eventId, "messages"), {
       text: newMessage,
       sender: user.email,
     });
 
-    setNewMessage("");
+    setNewMessage(""); // Reset the message input after sending
   };
 
   return (
@@ -64,6 +62,7 @@ const EventChat = () => {
           >
             <p className="text-sm font-semibold">{msg.sender}</p>
             <p>{msg.text}</p>
+            {/* Removed timestamp */}
           </div>
         ))}
       </div>
