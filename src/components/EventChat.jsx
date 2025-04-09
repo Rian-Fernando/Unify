@@ -30,13 +30,10 @@ const EventChat = () => {
     const unsubMessages = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((doc) => {
         const data = doc.data();
-        
-        // Check and log the timestamp for debugging
-        console.log("Timestamp Data:", data.timestamp);
-        
+
+        // Handle the timestamp correctly before rendering
         let timestampFormatted = "—";
         if (data.timestamp?.seconds) {
-          // Convert Firestore timestamp to a JS Date object
           const timestamp = new Date(data.timestamp.seconds * 1000);
           timestampFormatted = timestamp.toLocaleTimeString([], {
             hour: "2-digit",
