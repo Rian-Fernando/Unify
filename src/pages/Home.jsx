@@ -1,41 +1,43 @@
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../services/firebase";
 import EventCard from "../components/EventCard";
 
 const Home = () => {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({
+  const fetchEvents = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "events"));
+      const fetchedEvents = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setEvents(fetched);
-    });
+      setEvents(fetchedEvents);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => unsubscribe(); // cleanup
+  useEffect(() => {
+    fetchEvents();
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">🎓 Unify - Event Feed</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-blue-800 mb-6">🎉 Upcoming Events</h1>
 
-      {events.length === 0 ? (
-        <p className="text-gray-500">No events yet... 👀</p>
+      {loading ? (
+        <p className="text-center text-gray-500">Loading events...</p>
+      ) : events.length === 0 ? (
+        <p className="text-center text-gray-400">No events found. Check back later!</p>
       ) : (
-        <div className="space-y-4">
+        <div className="grid md:grid-cols-2 gap-6">
           {events.map(event => (
-            <EventCard
-              key={event.id}
-              id={event.id} // 🆕 Required to track RSVPs
-              title={event.title}
-              time={event.time}
-              tags={event.tags}
-              host={event.createdBy}
-          />
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       )}
