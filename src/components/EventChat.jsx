@@ -5,8 +5,6 @@ import {
   addDoc,
   onSnapshot,
   serverTimestamp,
-  query,
-  orderBy,
 } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -22,34 +20,17 @@ const EventChat = () => {
       setUser(currentUser);
     });
 
-    const q = query(
+    // Fetch messages from Firestore
+    const unsubMessages = onSnapshot(
       collection(db, "events", eventId, "messages"),
-      orderBy("timestamp", "asc")
-    );
-
-    const unsubMessages = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => {
-        const data = doc.data();
-
-        // Handle the timestamp correctly before rendering
-        let timestampFormatted = "—";
-        if (data.timestamp?.seconds) {
-          const timestamp = new Date(data.timestamp.seconds * 1000);
-          timestampFormatted = timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        }
-
-        return {
+      (snapshot) => {
+        const msgs = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...data,
-          timestampFormatted,
-        };
-      });
-
-      setMessages(msgs);
-    });
+          ...doc.data(),
+        }));
+        setMessages(msgs);
+      }
+    );
 
     return () => {
       unsubAuth();
@@ -60,6 +41,7 @@ const EventChat = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
 
+    // Save message to Firestore with server timestamp
     await addDoc(collection(db, "events", eventId, "messages"), {
       text: newMessage,
       sender: user.email,
@@ -85,7 +67,6 @@ const EventChat = () => {
           >
             <p className="text-sm font-semibold">{msg.sender}</p>
             <p>{msg.text}</p>
-            <p className="text-xs text-gray-400 mt-1">{msg.timestampFormatted}</p>
           </div>
         ))}
       </div>
