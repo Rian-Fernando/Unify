@@ -30,11 +30,12 @@ const Home = () => {
           {events.map(event => (
             <EventCard
               key={event.id}
+              id={event.id} // 🆕 Required to track RSVPs
               title={event.title}
               time={event.time}
               tags={event.tags}
               host={event.createdBy}
-            />
+          />
           ))}
         </div>
       )}

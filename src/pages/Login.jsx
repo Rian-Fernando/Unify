@@ -1,62 +1,72 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../services/firebase";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!email.endsWith("@mail.adelphi.edu")) {
-      setError("Only Adelphi emails are allowed.");
-      return;
-    }
-
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      navigate("/"); // redirect to home on success
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("🎉 Account created!");
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      navigate("/");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(`Firebase: ${err.message}`);
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🔐 Unify Login</h1>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <input
-          type="email"
-          placeholder="Adelphi Email"
-          className="w-full p-2 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-          required
-        />
-
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="bg-white p-8 rounded shadow max-w-sm w-full">
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          🔐 Unify {isSignUp ? "Sign Up" : "Login"}
+        </h1>
+        <form onSubmit={handleAuth} className="space-y-4">
+          <input
+            type="email"
+            placeholder="adelphi email"
+            className="w-full border px-3 py-2 rounded"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="password"
+            className="w-full border px-3 py-2 rounded"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {error && <p className="text-sm text-red-500">{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+          >
+            {isSignUp ? "Sign Up" : "Login"}
+          </button>
+        </form>
 
         <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded"
+          onClick={() => setIsSignUp(!isSignUp)}
+          className="mt-3 text-blue-500 text-sm underline w-full text-center"
         >
-          Login
+          {isSignUp ? "Already have an account? Login" : "No account? Sign up"}
         </button>
-      </form>
+      </div>
     </div>
   );
 };
