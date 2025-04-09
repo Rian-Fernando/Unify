@@ -28,7 +28,23 @@ const EventChat = () => {
     );
 
     const unsubMessages = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const msgs = snapshot.docs.map((doc) => {
+        const data = doc.data();
+
+        // Format timestamp into a human-readable string
+        const timestamp = data.timestamp?.seconds
+          ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—";
+
+        return {
+          id: doc.id,
+          ...data,
+          timestampFormatted: timestamp,
+        };
+      });
       setMessages(msgs);
     });
 
@@ -50,20 +66,6 @@ const EventChat = () => {
     setNewMessage("");
   };
 
-  const formatTimestamp = (timestampObj) => {
-    try {
-      if (!timestampObj || typeof timestampObj !== "object") return "—";
-      if (typeof timestampObj.toDate === "function") {
-        const date = timestampObj.toDate();
-        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      }
-      return "—";
-    } catch (err) {
-      console.error("Error formatting timestamp:", err);
-      return "—";
-    }
-  };
-
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">💬 Event Chat</h2>
@@ -80,9 +82,7 @@ const EventChat = () => {
           >
             <p className="text-sm font-semibold">{msg.sender}</p>
             <p>{msg.text}</p>
-            <p className="text-xs text-gray-400 mt-1">
-              {formatTimestamp(msg.timestamp)}
-            </p>
+            <p className="text-xs text-gray-400 mt-1">{msg.timestampFormatted}</p>
           </div>
         ))}
       </div>
