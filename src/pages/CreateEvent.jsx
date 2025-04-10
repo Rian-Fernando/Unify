@@ -8,6 +8,7 @@ const CreateEvent = () => {
   const [time, setTime] = useState("");
   const [tags, setTags] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -24,6 +25,7 @@ const CreateEvent = () => {
       const eventData = {
         title,
         time,
+        description,
         tags: tags.split(",").map(tag => tag.trim()),
         capacity: capacity || "Unlimited",
         createdAt: serverTimestamp(),
@@ -37,6 +39,7 @@ const CreateEvent = () => {
       setTime("");
       setTags("");
       setCapacity("");
+      setDescription("");
     } catch (err) {
       console.error("❌ Error creating event:", err);
       alert("Error creating event.");
@@ -65,6 +68,14 @@ const CreateEvent = () => {
           value={time}
           onChange={(e) => setTime(e.target.value)}
           required
+        />
+
+        <textarea
+          placeholder="Event Description"
+          className="w-full p-2 border rounded"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
         />
 
         <input

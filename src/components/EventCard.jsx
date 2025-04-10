@@ -1,80 +1,50 @@
-import React, { useState, useEffect } from "react";
-import { doc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore";
-import { db } from "../services/firebase";
-import { useAuth } from "../AuthContext";
-import { MapPinIcon, ClockIcon, UserGroupIcon } from "@heroicons/react/24/solid";
+import React from "react";
+import { Link } from "react-router-dom";
 
 const EventCard = ({ event }) => {
-  const { user } = useAuth();
-  const [attendees, setAttendees] = useState(event.rsvps || []);
+  const {
+    id,
+    title,
+    description,
+    tags = [],
+    maxAttendees,
+    attendees = [],
+    date,
+  } = event;
 
-  // Handle Firestore Timestamp
-  const eventDate = new Date(event.time?.toDate ? event.time.toDate() : event.time);
-  const formattedDate = eventDate.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "events", event.id), (docSnap) => {
-      if (docSnap.exists()) {
-        setAttendees(docSnap.data().rsvps || []);
-      }
-    });
-    return () => unsub();
-  }, [event.id]);
-
-  const alreadyJoined = attendees.includes(user?.email);
-
-  const handleJoin = async () => {
-    if (!user || alreadyJoined) return;
-
-    try {
-      const eventRef = doc(db, "events", event.id);
-      await updateDoc(eventRef, {
-        rsvps: arrayUnion(user.email),
-      });
-    } catch (err) {
-      console.error("RSVP failed:", err);
-      alert("Something went wrong trying to RSVP.");
-    }
-  };
+  const eventDate = date?.seconds ? new Date(date.seconds * 1000) : date ? new Date(date) : null;
+  const formattedDate = eventDate
+    ? `${eventDate.toLocaleDateString()} at ${eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    : "Date not set";
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-5 mb-4 w-full max-w-md transition hover:shadow-xl">
-      <h2 className="text-lg font-bold text-indigo-700 mb-1">🎉 {event.title}</h2>
-      <p className="text-sm text-gray-600 flex items-center gap-1 mb-1">
-        <MapPinIcon className="w-4 h-4 text-red-500" />
-        {event.location}
-      </p>
-      <p className="text-sm text-gray-700 mb-2">{event.description}</p>
+    <div className="bg-white p-4 rounded shadow-md space-y-2">
+      <h3 className="text-xl font-semibold text-blue-700">{title}</h3>
+      <p className="text-gray-600">{description}</p>
 
-      <div className="flex justify-between text-sm text-gray-500 items-center mb-3">
-        <p className="flex items-center gap-1">
-          <ClockIcon className="w-4 h-4" />
-          {formattedDate}
-        </p>
-        <p className="flex items-center gap-1">
-          <UserGroupIcon className="w-4 h-4" />
-          RSVPs: {attendees.length}
-        </p>
+      <div className="text-sm text-gray-500">
+        📅 <strong>When:</strong> {formattedDate}
+      </div>
+      <div className="text-sm text-gray-500">
+        👥 <strong>Attending:</strong> {attendees.length}/{maxAttendees || "∞"}
       </div>
 
-      {user && (
-        alreadyJoined ? (
-          <p className="text-green-600 text-sm font-semibold">✅ You've RSVP’d</p>
-        ) : (
-          <button
-            onClick={handleJoin}
-            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-          >
-            RSVP
-          </button>
-        )
+      {Array.isArray(tags) && tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 text-xs text-white">
+          {tags.map((tag, index) => (
+            <span key={index} className="bg-blue-400 px-2 py-1 rounded">
+              #{tag.trim()}
+            </span>
+          ))}
+        </div>
       )}
+
+      <Link
+        to={`/event/${id}/chat`}
+        className="block mt-2 text-blue-600 hover:underline"
+      >
+        💬 Join Chat
+      </Link>
     </div>
   );
 };

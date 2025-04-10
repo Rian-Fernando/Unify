@@ -23,10 +23,26 @@ const Home = () => {
       const snapshot = await getDocs(collection(db, "events"));
       
       // Map each document to extract its id and data.
-      const fetchedEvents = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const fetchedEvents = snapshot.docs.map((doc) => {
+        const data = doc.data();
+
+        let formattedDate = "";
+        if (data.date && typeof data.date === "object" && data.date.seconds) {
+          const dateObj = new Date(data.date.seconds * 1000);
+          formattedDate = dateObj.toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        }
+
+        return {
+          id: doc.id,
+          ...data,
+          date: formattedDate,
+        };
+      });
       
       // Update the events state with the fetched data.
       setEvents(fetchedEvents);
