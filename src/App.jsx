@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
+    // ⚠️ Do not wrap another <Router> in any child component. This is the single Router.
     <Router>
       <nav className="bg-blue-600 text-white p-4 flex gap-6">
         <Link to="/">Home</Link>
@@ -16,8 +17,15 @@ const App = () => {
       </nav>
 
       <Routes>
-        {/* 🏠 Public Home Page */}
-        <Route path="/" element={<Home />} />
+        {/* 🔐 Protected Home Page */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
         {/* 🔐 Protected Routes */}
         <Route
