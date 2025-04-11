@@ -37,26 +37,28 @@ const Login = () => {
         <form onSubmit={handleAuth} className="space-y-4">
           <input
             type="email"
-            placeholder="adelphi email"
+            placeholder="Enter your Adelphi email"
             className="w-full border px-3 py-2 rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
           <input
             type="password"
-            placeholder="password"
+            placeholder="Enter your password"
             className="w-full border px-3 py-2 rounded"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
           {error && <p className="text-sm text-red-500">{error}</p>}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
           >
-            {isSignUp ? "Sign Up" : "Login"}
+            {isSignUp ? "Create Account" : "Log In"}
           </button>
         </form>
 
@@ -64,7 +66,7 @@ const Login = () => {
           onClick={() => setIsSignUp(!isSignUp)}
           className="mt-3 text-blue-500 text-sm underline w-full text-center"
         >
-          {isSignUp ? "Already have an account? Login" : "No account? Sign up"}
+          {isSignUp ? "Already have an account? Log in here" : "Don't have an account? Sign up here"}
         </button>
       </div>
     </div>
