@@ -16,15 +16,10 @@ const App = () => {
       </nav>
 
       <Routes>
+        {/* 🏠 Public Home Page */}
+        <Route path="/" element={<Home />} />
+
         {/* 🔐 Protected Routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/create"
           element={
