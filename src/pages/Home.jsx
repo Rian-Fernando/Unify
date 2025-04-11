@@ -60,7 +60,7 @@ const Home = () => {
   }, []); // Empty dependency array ensures this runs once when the component mounts.
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 min-h-screen">
       {/* Page heading */}
       <h1 className="text-3xl font-bold text-blue-800 mb-6">
         🎉 Upcoming Events
