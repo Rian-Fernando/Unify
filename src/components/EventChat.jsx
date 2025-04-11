@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -41,6 +41,7 @@ const EventChat = () => {
     await addDoc(collection(db, "events", eventId, "messages"), {
       text: newMessage,
       sender: user.email,
+      timestamp: serverTimestamp(),
     });
 
     setNewMessage(""); // Reset the message input after sending
@@ -62,7 +63,14 @@ const EventChat = () => {
           >
             <p className="text-sm font-semibold">{msg.sender}</p>
             <p>{msg.text}</p>
-            {/* Removed timestamp */}
+            <p className="text-xs text-gray-400 mt-1">
+              {msg.timestamp?.seconds
+                ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : ""}
+            </p>
           </div>
         ))}
       </div>
