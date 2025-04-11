@@ -5,16 +5,19 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const AuthContext = createContext();
 
+/**
+ * Provides the current authenticated user context to the entire application.
+ */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
-    return unsub;
+    return unsubscribeAuth;
   }, []);
 
   return (
@@ -24,4 +27,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+/**
+ * Custom hook to access the AuthContext.
+ */
 export const useAuth = () => useContext(AuthContext);
