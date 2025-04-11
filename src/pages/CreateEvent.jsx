@@ -5,7 +5,7 @@ import { useAuth } from "../AuthContext";
 
 const CreateEvent = () => {
   const [title, setTitle] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(null);
   const [tags, setTags] = useState("");
   const [capacity, setCapacity] = useState("");
   const [description, setDescription] = useState("");
@@ -24,7 +24,7 @@ const CreateEvent = () => {
     try {
       const eventData = {
         title,
-        time,
+        time: time ? time.toISOString() : "",
         description,
         tags: tags.split(",").map(tag => tag.trim()),
         capacity: capacity || "Unlimited",
@@ -36,7 +36,7 @@ const CreateEvent = () => {
 
       alert("✅ Event created successfully!");
       setTitle("");
-      setTime("");
+      setTime(null);
       setTags("");
       setCapacity("");
       setDescription("");
@@ -62,11 +62,10 @@ const CreateEvent = () => {
         />
 
         <input
-          type="text"
-          placeholder="Time (e.g. 6:00 PM)"
+          type="datetime-local"
           className="w-full p-2 border rounded"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
+          value={time ? new Date(time).toISOString().slice(0, 16) : ""}
+          onChange={(e) => setTime(new Date(e.target.value))}
           required
         />
 
