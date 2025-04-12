@@ -18,7 +18,8 @@ const Login = () => {
       }
     });
     return () => unsubscribe();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -70,7 +71,7 @@ const Login = () => {
               autoComplete="current-password"
             />
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-500" aria-live="assertive">{error}</p>}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-md font-medium shadow-md transition-all duration-150"
