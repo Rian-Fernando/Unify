@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../services/firebase";
 import EventCard from "../components/EventCard";
+import { useAuth } from "../AuthContext";
 
 const Home = () => {
+  const { currentUser } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +27,17 @@ const Home = () => {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  if (!currentUser) {
+    return (
+      <div className="text-center p-10 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-blue-800 mb-4">Welcome to Unify 🎓</h1>
+        <p className="text-lg text-gray-600">
+          Join your university community. Discover events, meet people, and stay connected. Log in to get started.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
