@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../services/firebase";
 import EventCard from "../components/EventCard";
 import { useAuth } from "../AuthContext";
 
@@ -25,7 +25,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
+    if (currentUser) {
+      fetchEvents();
+    }
   }, [currentUser]);
 
   if (!currentUser) {

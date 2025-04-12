@@ -14,7 +14,7 @@ const App = () => {
 
   return (
     <Router>
-      <Navbar />
+      {user && <Navbar />}
       <Routes>
         {/* 🔓 Public Route */}
         <Route

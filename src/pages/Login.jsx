@@ -14,12 +14,13 @@ const Login = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
       }
     });
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate]);
 
   const handleAuth = async (e) => {
     e.preventDefault();

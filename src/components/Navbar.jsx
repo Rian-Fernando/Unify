@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
@@ -11,9 +11,18 @@ const Navbar = () => {
         Unify
       </Link>
       <div className="flex items-center gap-6 text-sm font-medium">
-        {user ? (
+        {!user ? (
           <>
-            <Link to="/" className="hover:text-blue-600 transition-colors" aria-label="View Events">
+            <Link to="/" className="hover:text-blue-600 transition-colors" aria-label="Go to home page">
+              Home
+            </Link>
+            <Link to="/login" className="hover:text-blue-600 transition-colors" aria-label="Login to your account">
+              Login
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/home" className="hover:text-blue-600 transition-colors" aria-label="View Events">
               Events
             </Link>
             <Link to="/create" className="hover:text-blue-600 transition-colors" aria-label="Create a new event">
@@ -22,14 +31,11 @@ const Navbar = () => {
             <button
               onClick={() => logout?.()}
               className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors px-3 py-1 rounded"
+              aria-label="Logout of your account"
             >
               Logout
             </button>
           </>
-        ) : (
-          <Link to="/login" className="hover:text-blue-600 transition-colors" aria-label="Login to your account">
-            Login
-          </Link>
         )}
       </div>
     </nav>
