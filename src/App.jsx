@@ -17,17 +17,14 @@ const App = () => {
       <Navbar />
       <Routes>
         {/* 🔓 Public Route */}
-        <Route path="/" element={<Landing />} />
-
-        {/* 🔐 Protected Routes */}
         <Route
-          path="/home"
+          path="/"
           element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
+            user ? <Home /> : <Landing />
           }
         />
+
+        {/* 🔐 Protected Routes */}
         <Route
           path="/create"
           element={
