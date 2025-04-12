@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebase";
 
 const Login = () => {
@@ -9,6 +9,16 @@ const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // Redirect to homepage if already logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -20,8 +30,12 @@ const Login = () => {
         alert("🎉 Account created!");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            navigate("/");
+          }
+        });
       }
-      navigate("/");
     } catch (err) {
       console.error(err);
       setError(`Firebase: ${err.message}`);
@@ -29,44 +43,51 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded shadow max-w-sm w-full">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          🔐 Unify {isSignUp ? "Sign Up" : "Login"}
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-100 to-gray-200 px-4">
+      <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-sm">
+        <h1 className="text-3xl font-semibold text-gray-800 text-center mb-6">
+          {isSignUp ? "🔐 Create an Account" : "🔓 Log In to Unify"}
         </h1>
-        <form onSubmit={handleAuth} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Enter your Adelphi email"
-            className="w-full border px-3 py-2 rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <input
-            type="password"
-            placeholder="Enter your password"
-            className="w-full border px-3 py-2 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+        <form onSubmit={handleAuth} className="space-y-5">
+          <div>
+            <label className="block text-gray-600 text-sm mb-1">Adelphi Email</label>
+            <input
+              type="email"
+              placeholder="yourname@mail.adelphi.edu"
+              className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-600 text-sm mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="********"
+              className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-md font-medium shadow-md transition-all duration-150"
           >
-            {isSignUp ? "Create Account" : "Log In"}
+            {isSignUp ? "Sign Up" : "Log In"}
           </button>
         </form>
-
         <button
           onClick={() => setIsSignUp(!isSignUp)}
-          className="mt-3 text-blue-500 text-sm underline w-full text-center"
+          className="mt-5 text-blue-600 text-sm text-center w-full hover:underline"
         >
-          {isSignUp ? "Already have an account? Log in here" : "Don't have an account? Sign up here"}
+          {isSignUp
+            ? "👤 Already a member? Log in"
+            : "🆕 New to Unify? Create an account"}
         </button>
       </div>
     </div>
