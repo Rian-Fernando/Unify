@@ -27,17 +27,17 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-semibold text-gray-600">🔒 Checking authentication...</p>
-      </div>
+      <section className="flex items-center justify-center h-screen bg-white">
+        <p className="text-base text-gray-500 tracking-wide">Authenticating your session...</p>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg text-red-500 font-semibold">⚠️ Authentication error occurred.</p>
-      </div>
+      <section className="flex items-center justify-center h-screen bg-white">
+        <p className="text-base text-red-500 tracking-wide">Authentication failed. Please try again.</p>
+      </section>
     );
   }
 
