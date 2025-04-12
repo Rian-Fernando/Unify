@@ -28,13 +28,10 @@ const Login = () => {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
         alert("🎉 Account created!");
+        navigate("/");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            navigate("/");
-          }
-        });
+        navigate("/");
       }
     } catch (err) {
       console.error(err);
