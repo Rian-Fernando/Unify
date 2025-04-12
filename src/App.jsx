@@ -1,33 +1,33 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useAuth } from "./AuthContext";
 import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import Login from './pages/Login';
 import EventChat from './components/EventChat';
 import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './pages/Landing';
+import Navbar from './components/Navbar';
 
 const App = () => {
-  return (
-    // ⚠️ Do not wrap another <Router> in any child component. This is the single Router.
-    <Router>
-      <nav className="bg-blue-600 text-white p-4 flex gap-6">
-        <Link to="/">Home</Link>
-        <Link to="/create">Create Event</Link>
-        <Link to="/login">Login</Link>
-      </nav>
+  const { user } = useAuth();
 
+  return (
+    <Router>
+      <Navbar />
       <Routes>
-        {/* 🔐 Protected Home Page */}
+        {/* 🔓 Public Route */}
+        <Route path="/" element={<Landing />} />
+
+        {/* 🔐 Protected Routes */}
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />
             </ProtectedRoute>
           }
         />
-
-        {/* 🔐 Protected Routes */}
         <Route
           path="/create"
           element={
