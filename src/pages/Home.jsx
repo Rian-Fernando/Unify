@@ -40,8 +40,11 @@ const Home = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-blue-800 mb-6">🎉 Upcoming Events</h1>
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="mb-10 text-center">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Upcoming Events</h2>
+        <p className="text-gray-500">Discover what's happening on campus</p>
+      </div>
       {loading ? (
         <p className="text-center text-gray-500">Loading events...</p>
       ) : events.length === 0 ? (
